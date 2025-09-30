@@ -59,7 +59,7 @@ class FaceApiService {
 
   compareFaces(descriptor1: Float32Array | null, descriptor2: Float32Array | null): FaceVerificationResult {
     if (!descriptor1 || !descriptor2) {
-      return { match: false, distance: 1, similarity: '0' };
+      return { match: false, distance: 1, similarity: 0 };
     }
 
     // Calculate Euclidean distance
@@ -70,7 +70,7 @@ class FaceApiService {
     return {
       match,
       distance,
-      similarity: similarity.toFixed(1)
+      similarity: parseFloat(similarity.toFixed(1))
     };
   }
 

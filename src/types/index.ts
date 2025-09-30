@@ -57,7 +57,7 @@ export interface EyeGaze {
 export interface FaceVerificationResult {
   match: boolean;
   distance: number;
-  similarity: string;
+  similarity: number;
 }
 
 // App State Types

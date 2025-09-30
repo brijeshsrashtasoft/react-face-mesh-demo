@@ -6,7 +6,7 @@ interface FaceMeshCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   verificationStatus?: {
     match: boolean;
-    similarity: string;
+    similarity: number;
   } | null;
 }
 
