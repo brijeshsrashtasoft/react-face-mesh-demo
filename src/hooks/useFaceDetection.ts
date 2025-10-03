@@ -89,7 +89,7 @@ export const useFaceDetection = ({ onFaceDetected, onBlinkDetected }: UseFaceDet
 
       setIsDetecting(true);
 
-      // Initialize MediaPipe
+      // Initialize face detection
       await mediaPipeService.initialize(onResults);
 
       // Start camera

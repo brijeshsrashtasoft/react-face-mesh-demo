@@ -1,6 +1,6 @@
 {
-  "short_name": "Face Mesh Demo",
-  "name": "MediaPipe Face Mesh Demo",
+  "short_name": "Face Detection",
+  "name": "Face Detection System",
   "icons": [
     {
       "src": "favicon.ico",

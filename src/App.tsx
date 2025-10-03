@@ -23,7 +23,7 @@ const AppContent: React.FC = () => {
 
   const [currentLandmarks, setCurrentLandmarks] = useState<FaceLandmark[] | null>(null);
   const [earValue, setEarValue] = useState(0);
-  const [status, setStatus] = useState('Ready to start - Click "Start Detection"');
+  const [status, setStatus] = useState('');
 
   const handleFaceDetected = useCallback((landmarks: FaceLandmark[]) => {
     setCurrentLandmarks(landmarks);
@@ -57,31 +57,50 @@ const AppContent: React.FC = () => {
     setStatus('Detection stopped');
   };
 
-  const handleStartLiveness = () => {
-    if (!isDetecting) {
-      alert('Please start face detection first!');
-      return;
-    }
-
+  const handleStartLiveness = async () => {
     if (!referenceImageLoaded) {
       alert('Please upload a reference photo before starting the liveness test!');
       return;
     }
 
-    // Reset all state before starting liveness test
-    resetLivenessState();
-    setBlinkCount(0);
-    setIsLivenessActive(true);
+    try {
+      // Start camera if not already detecting
+      if (!isDetecting) {
+        setStatus('Starting camera...');
+        setBlinkCount(0);
+        await startDetection();
+        setStatus('Camera ready - Starting liveness test');
+      }
+      
+      // Start liveness test immediately
+      resetLivenessState();
+      setBlinkCount(0);
+      setIsLivenessActive(true);
+    } catch (error) {
+      setStatus('Error: ' + (error as Error).message);
+    }
   };
 
-  const handleLivenessComplete = () => {
-    // Liveness test completed
-    console.log('Liveness test completed');
+  const handleLivenessComplete = (reset: boolean = false) => {
+    // Liveness test completed - stop camera
+    console.log('Liveness test completed, reset:', reset);
+    stopDetection();
+    
+    if (reset) {
+      // User clicked "Try Again" - reset everything
+      setIsLivenessActive(false);
+      setStatus('Ready to start new liveness test');
+      setBlinkCount(0);
+      resetLivenessState();
+    } else {
+      // Test just completed - keep results visible
+      setStatus('Liveness test completed - Results shown above');
+    }
   };
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>MediaPipe Face Mesh Demo</h1>
+      <h1 className={styles.title}>Face Detection System</h1>
 
       <PhotoUpload />
 
@@ -91,37 +110,29 @@ const AppContent: React.FC = () => {
         verificationStatus={verificationStatus}
       />
 
-      <div className={styles.controls}>
-        <button
-          onClick={handleStartDetection}
-          disabled={isDetecting}
-          className={styles.button}
-        >
-          Start Detection
-        </button>
-        <button
-          onClick={handleStopDetection}
-          disabled={!isDetecting}
-          className={styles.button}
-        >
-          Stop Detection
-        </button>
-        <button
-          onClick={handleStartLiveness}
-          disabled={isLivenessActive || !referenceImageLoaded}
-          className={styles.button}
-        >
-          Start Liveness Test
-        </button>
-      </div>
-
-      <div className={styles.status}>
-        {status}
-      </div>
-
-      {isDetecting && !isLivenessActive && (
-        <BlinkCounter earValue={earValue} />
+      {referenceImageLoaded && !isLivenessActive && (
+        <div className={styles.controls}>
+          <button
+            onClick={handleStartLiveness}
+            className={styles.button}
+            style={{ 
+              backgroundColor: '#4CAF50',
+              fontSize: '18px',
+              padding: '15px 40px'
+            }}
+          >
+            Start Liveness Test
+          </button>
+        </div>
       )}
+
+      {status && (
+        <div className={styles.status}>
+          {status}
+        </div>
+      )}
+
+      {/* Remove BlinkCounter to keep UI clean during liveness test */}
 
       <LivenessDetection
         currentLandmarks={currentLandmarks}

@@ -1,7 +1,8 @@
 {
-  "name": "react-face-mesh-demo",
+  "name": "face-detection-system",
   "version": "1.0.0",
   "private": true,
+  "description": "Face Detection System",
   "dependencies": {
     "@mediapipe/camera_utils": "^0.3.1640029074",
     "@mediapipe/face_mesh": "^0.4.1633559619",

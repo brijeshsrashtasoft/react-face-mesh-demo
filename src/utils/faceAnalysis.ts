@@ -11,25 +11,40 @@ export function calculateDistance(point1: FaceLandmark, point2: FaceLandmark): n
 // Calculate head pose angles
 export function calculateHeadPose(landmarks: FaceLandmark[]): HeadPose {
   // Key landmarks for head pose estimation
-  const noseTip = landmarks[1];
-  const chin = landmarks[152];
-  const leftEye = landmarks[33];
-  const rightEye = landmarks[263];
-  const foreheadCenter = landmarks[9];
+  const noseTip = landmarks[1];     // Nose tip
+  const noseBridge = landmarks[6];  // Nose bridge
+  const chin = landmarks[152];      // Chin
+  const leftEye = landmarks[33];    // Left eye inner corner
+  const rightEye = landmarks[263];  // Right eye inner corner
+  const leftEar = landmarks[234];   // Left ear tragion
+  const rightEar = landmarks[454];  // Right ear tragion
+  const foreheadCenter = landmarks[9]; // Forehead center
   
-  // Calculate yaw (left-right rotation)
-  const eyeDistance = rightEye.x - leftEye.x;
-  const noseCenterX = (leftEye.x + rightEye.x) / 2;
-  const noseOffset = noseTip.x - noseCenterX;
-  const yaw = (noseOffset / eyeDistance) * 100; // Normalize to percentage
+  // Calculate yaw (left-right rotation) using nose and ear positions
+  const faceCenterX = (leftEye.x + rightEye.x) / 2;
+  const faceWidth = Math.abs(rightEar.x - leftEar.x);
   
-  // Calculate pitch (up-down rotation)
-  const faceHeight = chin.y - foreheadCenter.y;
-  const noseVerticalOffset = noseTip.y - ((chin.y + foreheadCenter.y) / 2);
-  const pitch = (noseVerticalOffset / faceHeight) * 100;
+  // Use nose tip offset from face center for yaw
+  // NOTE: In camera view, turning head left moves nose to the right (positive x)
+  // So we need to negate to get intuitive directions
+  const noseOffsetX = noseTip.x - faceCenterX;
+  // Convert to degrees - typical range is -60 to +60 degrees
+  // Negative value = turned left, Positive value = turned right
+  const yaw = -(noseOffsetX / faceWidth) * 120;
+  
+  // Calculate pitch (up-down rotation) using nose bridge and chin
+  const faceHeight = Math.abs(chin.y - foreheadCenter.y);
+  const noseLength = Math.abs(noseTip.y - noseBridge.y);
+  const expectedNoseLength = faceHeight * 0.15; // Expected nose length as proportion of face
+  
+  // When looking up, nose appears shorter; when looking down, it appears longer
+  const noseLengthRatio = noseLength / expectedNoseLength;
+  // Convert to degrees - typical range is -45 to +45 degrees
+  const pitch = (noseLengthRatio - 1) * 45;
   
   // Calculate roll (head tilt)
   const eyeVerticalDiff = rightEye.y - leftEye.y;
+  const eyeDistance = Math.abs(rightEye.x - leftEye.x);
   const roll = Math.atan2(eyeVerticalDiff, eyeDistance) * (180 / Math.PI);
   
   return { yaw, pitch, roll };
@@ -37,7 +52,7 @@ export function calculateHeadPose(landmarks: FaceLandmark[]): HeadPose {
 
 // Calculate Eye Aspect Ratio (EAR)
 export function calculateEAR(landmarks: FaceLandmark[]): EyeAspectRatio {
-  // Eye landmarks for MediaPipe Face Mesh
+  // Eye landmarks indices
   const leftEye = {
     p1: landmarks[33],   // Left corner
     p2: landmarks[133],  // Right corner

@@ -1,4 +1,4 @@
-// MediaPipe Types
+// Face Detection Types
 export interface FaceLandmark {
   x: number;
   y: number;

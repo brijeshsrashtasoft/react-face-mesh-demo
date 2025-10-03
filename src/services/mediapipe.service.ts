@@ -2,7 +2,7 @@ import { FaceMesh } from '@mediapipe/face_mesh';
 import { Camera } from '@mediapipe/camera_utils';
 import { FaceLandmark, FaceMeshResults } from '../types';
 
-// Declare global types for MediaPipe drawing utilities
+// Declare global types for drawing utilities
 declare global {
   interface Window {
     drawConnectors: any;
@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-class MediaPipeService {
+class FaceDetectionService {
   private faceMesh: FaceMesh | null = null;
   private camera: Camera | null = null;
   private isInitialized = false;
@@ -81,7 +81,7 @@ class MediaPipeService {
       });
 
       this.faceMesh.onResults((results: any) => {
-        // Convert MediaPipe results to our FaceMeshResults type
+        // Convert results to our FaceMeshResults type
         const convertedResults: FaceMeshResults = {
           image: results.image,
           multiFaceLandmarks: results.multiFaceLandmarks
@@ -174,4 +174,4 @@ class MediaPipeService {
   }
 }
 
-export const mediaPipeService = new MediaPipeService();
+export const mediaPipeService = new FaceDetectionService();
